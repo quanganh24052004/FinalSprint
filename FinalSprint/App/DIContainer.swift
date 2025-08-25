@@ -6,3 +6,8 @@
 //
 
 import Foundation
+final class DIContainer {
+    static let shared = DIContainer()
+    let repo: ReminderRepository = ReminderRepositoryRealm()
+    private init() {}
+}

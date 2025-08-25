@@ -11,7 +11,7 @@ import SwiftUI
 struct FinalSprintApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ReminderListView(repo: DIContainer.shared.repo)
         }
     }
 }
