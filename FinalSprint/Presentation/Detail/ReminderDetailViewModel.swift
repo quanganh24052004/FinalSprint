@@ -47,7 +47,13 @@ final class ReminderDetailViewModel: ObservableObject {
             self.selectedTagId = r.tagId
             self.photoPaths = r.photoPaths
             
-            
+            if let mins = r.dueTimeMinutes {
+                self.useTime = true
+                let h = mins / 60, m = mins % 60
+                self.dueTime = Calendar.current.date(bySettingHour: h, minute: m, second: 0, of: r.dueDate) ?? r.dueDate
+            } else {
+                self.useTime = false
+            }
         }
 
         // Load picked images → lưu local
@@ -70,26 +76,41 @@ final class ReminderDetailViewModel: ObservableObject {
     // MARK: - Validation
     func validate() -> Bool {
         titleError = title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || title.count > 50
-        ? "Tiêu đề không trống (≤ 50 ký tự)"
-        : nil
+        ? "Tiêu đề không trống (≤ 50 ký tự)" : nil
 
         descError = descriptionText.isEmpty ? nil : (descriptionText.count > 150 ? "Mô tả ≤ 150 ký tự" : nil)
 
-        dateError = dueDate.isAfterOrEqualToday() ? nil : "Due Date phải ≥ hôm nay"
+        // Ngày+giờ hiệu lực
+        let effDue: Date = {
+            if useTime {
+                let comps = Calendar.current.dateComponents([.hour, .minute], from: dueTime)
+                let h = comps.hour ?? 9, m = comps.minute ?? 0
+                return Calendar.current.date(bySettingHour: h, minute: m, second: 0, of: dueDate.dayOnly) ?? dueDate.dayOnly
+            } else {
+                return Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: dueDate.dayOnly) ?? dueDate.dayOnly
+            }
+        }()
 
+        dateError = effDue >= Date() ? nil : "Due Date/Time phải ≥ hiện tại"
         return titleError == nil && descError == nil && dateError == nil
     }
 
-    // MARK: - Save
     func save() async -> Bool {
         guard validate() else { return false }
 
         let now = Date()
+        let mins: Int? = {
+            guard useTime else { return nil }
+            let comps = Calendar.current.dateComponents([.hour, .minute], from: dueTime)
+            return (comps.hour ?? 9) * 60 + (comps.minute ?? 0)
+        }()
+
         let base = Reminder(
             id: editingId ?? UUID().uuidString,
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             description: descriptionText.isEmpty ? nil : descriptionText,
             dueDate: dueDate.dayOnly,
+            dueTimeMinutes: mins,
             createdAt: editingId == nil ? now : (repo.get(id: editingId!)?.createdAt ?? now),
             updatedAt: now,
             tagId: selectedTagId,
@@ -97,12 +118,10 @@ final class ReminderDetailViewModel: ObservableObject {
         )
 
         do {
-            if editingId == nil {
-                try repo.create(base)
-            } else {
-                try repo.update(base)
-            }
-            await NotificationScheduler.schedule1hBefore(reminderId: base.id, title: base.title, dueDateOnly: base.dueDate)
+            if editingId == nil { try repo.create(base) } else { try repo.update(base) }
+            await NotificationScheduler.schedule1hBefore(reminderId: base.id,
+                                                         title: base.title,
+                                                         dueDateTime: base.effectiveDueDate)
             return true
         } catch {
             return false

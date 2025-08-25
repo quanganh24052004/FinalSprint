@@ -30,6 +30,10 @@ struct ReminderEditorView: View {
 
                 Section("Thời hạn") {
                     DatePicker("Due Date", selection: $vm.dueDate, displayedComponents: .date)
+                    Toggle("Đặt giờ cụ thể", isOn: $vm.useTime)
+                    if vm.useTime {
+                        DatePicker("Time", selection: $vm.dueTime, displayedComponents: .hourAndMinute)
+                    }
                     if let err = vm.dateError { Text(err).font(.footnote).foregroundStyle(.red) }
                 }
 

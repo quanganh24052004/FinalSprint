@@ -18,20 +18,36 @@ struct ReminderListView: View {
     var body: some View {
         NavigationStack {
             List {
-                if !vm.today.isEmpty {
-                    Section("Today") {
-                        ForEach(vm.today) { r in
-                            ReminderRowView(reminder: r)
+                if vm.today.isEmpty && vm.upcoming.isEmpty {
+                    VStack(alignment: .center) {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Text("Chưa có lời nhắc nào được thêm")
+                                .foregroundStyle(.secondary)
+                            Spacer()
                         }
-                        .onDelete { vm.delete(at: $0, isToday: true) }
+                        Spacer()
                     }
-                }
+                    .listRowBackground(Color.clear)
+                } else {
+                    if !vm.today.isEmpty {
+                        Section("Today") {
+                            ForEach(vm.today) { r in
+                                ReminderRowView(reminder: r)
+                            }
+                            .onDelete { vm.delete(at: $0, isToday: true) }
+                        }
+                    }
 
-                Section("Upcoming") {
-                    ForEach(vm.upcoming) { r in
-                        ReminderRowView(reminder: r)
+                    if !vm.upcoming.isEmpty{
+                        Section("Upcoming") {
+                            ForEach(vm.upcoming) { r in
+                                ReminderRowView(reminder: r)
+                            }
+                            .onDelete { vm.delete(at: $0, isToday: false) }
+                        }
                     }
-                    .onDelete { vm.delete(at: $0, isToday: false) }
                 }
             }
             .listStyle(.insetGrouped)
