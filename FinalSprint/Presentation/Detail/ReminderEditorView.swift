@@ -24,7 +24,7 @@ struct ReminderEditorView: View {
                     if let err = vm.titleError { Text(err).font(.footnote).foregroundStyle(.red) }
 
                     TextField("Mô tả", text: $vm.descriptionText, axis: .vertical)
-                        .lineLimit(3...5)
+                        .lineLimit(1)
                     if let err = vm.descError { Text(err).font(.footnote).foregroundStyle(.red) }
                 }
 
@@ -42,12 +42,25 @@ struct ReminderEditorView: View {
                             .datePickerStyle(.graphical)
                         Toggle("Giờ", isOn: $vm.useTime)
                         if vm.useTime {
-                            DatePicker("Time", selection: $vm.dueTime, displayedComponents: .hourAndMinute)
+                            DatePicker("Giờ", selection: $vm.dueTime, displayedComponents: .hourAndMinute)
                         }
                     }
                     if let err = vm.dateError { Text(err).font(.footnote).foregroundStyle(.red) }
                 }
-
+                Section {
+                    Picker("Tag", selection: $vm.selectedTagId) {
+                        ForEach(vm.allTags) { t in
+                            HStack {
+                                Circle()
+                                    .fill(Color(TagColorKey.fromName(t.name)))
+                                    .frame(width: 10, height: 10)
+                                Text(t.name)
+                            }
+                            .tag(t.id)
+                        }
+                    }
+                }
+                
                 Section {
                     PhotosPicker(selection: $vm.pickerItems, matching: .images, photoLibrary: .shared()) {
                         Label("Thêm ảnh", systemImage: "photo.on.rectangle")
@@ -71,7 +84,7 @@ struct ReminderEditorView: View {
                     }
                 }
             }
-            .navigationTitle("Reminder")
+            .navigationTitle("Lời nhắc")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {

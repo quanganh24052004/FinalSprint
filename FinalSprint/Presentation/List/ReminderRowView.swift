@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct ReminderRowView: View {
     let reminder: Reminder
@@ -21,6 +22,17 @@ struct ReminderRowView: View {
     @FocusState private var focused: Field?
     @State private var saveTask: Task<Void, Never>?
     private enum Field { case title, desc }
+
+    // Lấy tên tag display name dựa trên tagId
+    private var tagDisplayName: String {
+        guard
+            let realm = try? RealmManager.makeRealm(),
+            let t = realm.object(ofType: TagRealm.self, forPrimaryKey: reminder.tagId)
+        else {
+            return ""
+        }
+        return t.name
+    }
 
     init(
         reminder: Reminder,
@@ -40,16 +52,21 @@ struct ReminderRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            TagChip(tag: reminder.tagId)
 
             VStack(alignment: .leading, spacing: 4) {
-                TextField("Title * (≤ 50)", text: $title)
-                    .font(.system(size: 17))
-                    .foregroundColor(.neutral1)
-                    .focused($focused, equals: .title)
-                    .submitLabel(.done)
-                    .onSubmit { commitSave() }
-                    .onChange(of: title) { scheduleDebouncedSave() }
+                    TextField("Title", text: $title)
+                        .font(.system(size: 17))
+                        .foregroundColor(.neutral1)
+                        .focused($focused, equals: .title)
+                        .submitLabel(.done)
+                        .onSubmit { commitSave() }
+                        .onChange(of: focused) { _, newFocus in
+                            // Nếu vừa mất focus khỏi Title, lại là draft + title trống => huỷ ngay
+                            if (newFocus == nil), isNewDraft, title.trimmingCharacters(in: .whitespaces).isEmpty {
+                                onAbandonDraft(reminder.id)
+                            }
+                        }
+
 
                 TextField("Description (≤ 150)", text: $desc)
                     .font(.system(size: 15))
@@ -63,6 +80,8 @@ struct ReminderRowView: View {
 
             Spacer()
 
+            TagChip(tag: reminder.tagId)
+                .padding(16)
             Button { onOpenDetail(reminder) } label: {
                 Image(systemName: "info.circle").font(.system(size: 20, weight: .semibold))
             }
@@ -114,3 +133,4 @@ struct ReminderRowView: View {
         }
     }
 }
+

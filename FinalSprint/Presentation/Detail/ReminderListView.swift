@@ -47,10 +47,8 @@ struct ReminderListView: View {
                     let newId = vm.createDraft()
                     justCreatedId = newId
                 } label: {
-                    Label("New Reminder", systemImage: "plus")
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(.ultraThinMaterial, in: Capsule())
+                    Label("New Reminder", systemImage: "plus.circle.fill")
+                        .font(.system(size: 18, weight: .semibold))
                 }
                 .padding()
             }
@@ -78,17 +76,18 @@ struct ReminderListView: View {
     }
 
     private var emptyState: some View {
-        VStack(alignment: .center) {
-            Spacer()
-            HStack {
+            VStack(alignment: .center) {
                 Spacer()
-                Text("Chưa có lời nhắc nào được thêm")
-                    .foregroundStyle(.secondary)
+                HStack {
+                    Spacer()
+                    Text("No reminder")
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundColor(.neutral3)
+                    Spacer()
+                }
                 Spacer()
             }
-            Spacer()
-        }
-        .listRowBackground(Color.clear)
+            .listRowBackground(Color.clear)
     }
 
     private var todaySection: some View {
@@ -127,9 +126,3 @@ struct ReminderListView: View {
         }
     }
 }
-
-//#Preview {
-//    NavigationStack {
-//        ReminderListView(repo: DIContainer.shared.repo)
-//    }
-//}

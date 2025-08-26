@@ -69,15 +69,13 @@ final class ReminderRepositoryRealm: ReminderRepository {
 
         try realm.write {
             for bi in BuiltInTag.allCases where missing.contains(bi.rawValue) {
-                let tag = TagRealm()
-                tag.name = bi.rawValue
-                tag.colorHex = bi.color.toHex()
-                tag.isBuiltIn = true
-                realm.add(tag, update: .modified)
+                let t = TagRealm()
+                t.name = bi.rawValue
+                t.isBuiltIn = true
+                realm.add(t, update: .modified)
             }
         }
     }
-
     func allTags() -> [Tag] {
         realm.objects(TagRealm.self).map { $0.toDomain() }
     }
@@ -85,7 +83,6 @@ final class ReminderRepositoryRealm: ReminderRepository {
     func createCustomTag(name: String, colorHex: String) throws -> Tag {
         let t = TagRealm()
         t.name = name
-        t.colorHex = colorHex
         t.isBuiltIn = false
         try realm.write { realm.add(t, update: .modified) }
         return t.toDomain()
@@ -122,6 +119,6 @@ private extension ReminderRealm {
 
 private extension TagRealm {
     func toDomain() -> Tag {
-        Tag(id: id, name: name, colorHex: colorHex, isBuiltIn: isBuiltIn)
+        Tag(id: id, name: name, isBuiltIn: isBuiltIn)
     }
 }
