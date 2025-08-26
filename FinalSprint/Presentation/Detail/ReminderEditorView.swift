@@ -19,37 +19,36 @@ struct ReminderEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Nội dung") {
-                    TextField("Title *", text: $vm.title)
+                Section {
+                    TextField("Tiêu đề", text: $vm.title)
                     if let err = vm.titleError { Text(err).font(.footnote).foregroundStyle(.red) }
 
-                    TextField("Description (≤ 150 ký tự)", text: $vm.descriptionText, axis: .vertical)
+                    TextField("Mô tả", text: $vm.descriptionText, axis: .vertical)
                         .lineLimit(3...5)
                     if let err = vm.descError { Text(err).font(.footnote).foregroundStyle(.red) }
                 }
 
-                Section("Thời hạn") {
-                    DatePicker("Due Date", selection: $vm.dueDate, displayedComponents: .date)
-                    Toggle("Đặt giờ cụ thể", isOn: $vm.useTime)
-                    if vm.useTime {
-                        DatePicker("Time", selection: $vm.dueTime, displayedComponents: .hourAndMinute)
+                Section {
+                    Toggle(isOn: $vm.useDate) {
+                        HStack {
+                            Image("ic_Date")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                            Text("Ngày")
+                        }
+                    }
+                    if vm.useDate {
+                        DatePicker("Ngày", selection: $vm.dueDate, displayedComponents: .date)
+                            .datePickerStyle(.graphical)
+                        Toggle("Giờ", isOn: $vm.useTime)
+                        if vm.useTime {
+                            DatePicker("Time", selection: $vm.dueTime, displayedComponents: .hourAndMinute)
+                        }
                     }
                     if let err = vm.dateError { Text(err).font(.footnote).foregroundStyle(.red) }
                 }
 
-//                Section("Tag") {
-//                    Picker("Chọn tag", selection: $vm.selectedTagId) {
-//                        ForEach(vm.allTags) { t in
-//                            HStack {
-//                                Circle().fill(Color(uiColor: UIColor(hex: t.colorHex))).frame(width: 10, height: 10)
-//                                Text(t.name)
-//                            }
-//                            .tag(t.id)
-//                        }
-//                    }
-//                }
-
-                Section("Ảnh đính kèm") {
+                Section {
                     PhotosPicker(selection: $vm.pickerItems, matching: .images, photoLibrary: .shared()) {
                         Label("Thêm ảnh", systemImage: "photo.on.rectangle")
                     }
@@ -75,13 +74,19 @@ struct ReminderEditorView: View {
             .navigationTitle("Reminder")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Huỷ") { dismiss() }
+                    Button {
+                        dismiss()
+                    } label : {
+                        Image(systemName: "xmark")
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Lưu") {
+                    Button {
                         Task {
                             if await vm.save() { dismiss() }
                         }
+                    } label: {
+                        Image(systemName: "checkmark")
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -89,7 +94,3 @@ struct ReminderEditorView: View {
         }
     }
 }
-
-//#Preview {
-//    ReminderEditorView()
-//}

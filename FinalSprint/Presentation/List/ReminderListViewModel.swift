@@ -66,4 +66,15 @@ final class ReminderListViewModel: ObservableObject {
             NotificationScheduler.cancel(reminderId: source[index].id)
         }
     }
+    
+    func quickUpdate(id: String, title: String, desc: String?) {
+        // Lấy bản gốc để giữ nguyên các trường khác
+        guard var r = repo.get(id: id) else { return }
+        r.title = title
+        r.description = desc
+        r.updatedAt = Date()
+        try? repo.update(r)
+    }
 }
+
+

@@ -7,9 +7,14 @@
 
 import SwiftUI
 
+private struct EditingReminder: Identifiable, Equatable {
+    let id: String
+}
+
 struct ReminderListView: View {
     @StateObject private var vm: ReminderListViewModel
     @State private var showingEditor = false
+    @State private var editingId: EditingReminder? = nil
 
     init(repo: ReminderRepository) {
         _vm = StateObject(wrappedValue: ReminderListViewModel(repo: repo))
@@ -34,7 +39,11 @@ struct ReminderListView: View {
                     if !vm.today.isEmpty {
                         Section("Today") {
                             ForEach(vm.today) { r in
-                                ReminderRowView(reminder: r)
+                                ReminderRowView(
+                                    reminder: r,
+                                    onQuickEdit: { id, t, d in vm.quickUpdate(id: id, title: t, desc: d) },
+                                    onOpenDetail: { r in editingId = EditingReminder(id: r.id) }
+                                )
                             }
                             .onDelete { vm.delete(at: $0, isToday: true) }
                         }
@@ -43,7 +52,11 @@ struct ReminderListView: View {
                     if !vm.upcoming.isEmpty{
                         Section("Upcoming") {
                             ForEach(vm.upcoming) { r in
-                                ReminderRowView(reminder: r)
+                                ReminderRowView(
+                                    reminder: r,
+                                    onQuickEdit: { id, t, d in vm.quickUpdate(id: id, title: t, desc: d) },
+                                    onOpenDetail: { r in editingId = EditingReminder(id: r.id) }
+                                )
                             }
                             .onDelete { vm.delete(at: $0, isToday: false) }
                         }
@@ -68,20 +81,25 @@ struct ReminderListView: View {
                 Button {
                     showingEditor = true
                 } label: {
-                    Label("New Reminder", systemImage: "plus")
+                    Label("New Reminder", systemImage: "plus.circle.fill")
+                        .font(.system(size: 18, weight: .semibold))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
-                        .background(.ultraThinMaterial, in: Capsule())
                 }
                 .padding()
             }
             .sheet(isPresented: $showingEditor) {
                 ReminderEditorView(repo: DIContainer.shared.repo)
             }
+            .sheet(item: $editingId) { item in
+                ReminderEditorView(repo: DIContainer.shared.repo, editingId: item.id)
+            }
         }
     }
 }
 
 //#Preview {
-//    ReminderListView()
+//    NavigationStack {
+//        ReminderListView(repo: DIContainer.shared.repo)
+//    }
 //}

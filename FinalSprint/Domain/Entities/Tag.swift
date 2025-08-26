@@ -27,8 +27,8 @@ enum BuiltInTag: String, CaseIterable, Identifiable {
 }
 
 struct Tag: Identifiable, Equatable {
-    let id: String            // id Realm
+    let id: String
     var name: String
-    var colorHex: String      // lưu dưới dạng hex để mapping qua SwiftUI Color
+    var colorHex: String
     var isBuiltIn: Bool
 }
