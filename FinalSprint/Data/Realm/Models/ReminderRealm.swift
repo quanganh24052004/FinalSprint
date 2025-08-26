@@ -18,6 +18,7 @@ final class ReminderRealm: Object {
     @Persisted var updatedAt: Date = Date()
     @Persisted var tag: TagRealm?
     @Persisted var photoPaths: List<String>
+    @Persisted var isCompleted: Bool = false
 }
 
 // Mapping
@@ -31,7 +32,8 @@ private extension ReminderRealm {
                  createdAt: createdAt,
                  updatedAt: updatedAt,
                  tagId: tag?.id ?? "",
-                 photoPaths: Array(photoPaths))
+                 photoPaths: Array(photoPaths),
+                 isCompleted: false)
     }
 
     static func fromDomain(_ r: Reminder, in realm: Realm) -> ReminderRealm {

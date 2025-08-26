@@ -96,10 +96,12 @@ private extension ReminderRealm {
                  title: title,
                  description: descText,
                  dueDate: dueDate,
+                 dueTimeMinutes: dueTimeMinutes,
                  createdAt: createdAt,
                  updatedAt: updatedAt,
                  tagId: tag?.id ?? "",
-                 photoPaths: Array(photoPaths))
+                 photoPaths: Array(photoPaths),
+                 isCompleted: isCompleted)
     }
 
     static func fromDomain(_ r: Reminder, in realm: Realm) -> ReminderRealm {
@@ -108,11 +110,13 @@ private extension ReminderRealm {
         obj.title = r.title
         obj.descText = r.description
         obj.dueDate = r.dueDate
+        obj.dueTimeMinutes = r.dueTimeMinutes
         obj.createdAt = r.createdAt
         obj.updatedAt = r.updatedAt
         obj.tag = realm.object(ofType: TagRealm.self, forPrimaryKey: r.tagId)
         obj.photoPaths.removeAll()
         obj.photoPaths.append(objectsIn: r.photoPaths)
+        obj.isCompleted = r.isCompleted
         return obj
     }
 }

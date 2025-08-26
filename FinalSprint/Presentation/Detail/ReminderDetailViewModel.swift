@@ -125,7 +125,8 @@ final class ReminderDetailViewModel: ObservableObject {
             createdAt: editingId == nil ? now : (repo.get(id: editingId!)?.createdAt ?? now),
             updatedAt: now,
             tagId: selectedTagId,
-            photoPaths: photoPaths
+            photoPaths: photoPaths,
+            isCompleted: false
         )
 
         do {

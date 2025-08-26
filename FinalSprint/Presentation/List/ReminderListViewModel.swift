@@ -91,7 +91,8 @@ final class ReminderListViewModel: ObservableObject {
             createdAt: now,
             updatedAt: now,
             tagId: defaultTagId,
-            photoPaths: []
+            photoPaths: [],
+            isCompleted: false
         )
         try? repo.create(r)
         return id
@@ -99,6 +100,13 @@ final class ReminderListViewModel: ObservableObject {
 
     func deleteDraft(id: String) {
         try? repo.delete(id: id)
+    }
+    
+    func toggleComplete(id: String, newValue: Bool) {
+        guard var r = repo.get(id: id) else { return }
+        r.isCompleted = newValue
+        r.updatedAt = Date()
+        try? repo.update(r)
     }
 
 }

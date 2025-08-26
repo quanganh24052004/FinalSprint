@@ -16,9 +16,11 @@ struct ReminderRowView: View {
     // NEW:
     let isNewDraft: Bool
     let onAbandonDraft: (_ id: String) -> Void
-
+    let onToggleComplete: (_ id: String, _ newValue: Bool) -> Void
     @State private var title: String
     @State private var desc: String
+    @State private var isCompleted: Bool
+    
     @FocusState private var focused: Field?
     @State private var saveTask: Task<Void, Never>?
     private enum Field { case title, desc }
@@ -39,24 +41,36 @@ struct ReminderRowView: View {
         onQuickEdit: @escaping (_ id: String, _ newTitle: String, _ newDesc: String?) -> Void,
         onOpenDetail: @escaping (_ r: Reminder) -> Void,
         isNewDraft: Bool = false,
-        onAbandonDraft: @escaping (_ id: String) -> Void = { _ in }
+        onAbandonDraft: @escaping (_ id: String) -> Void = { _ in },
+        onToggleComplete: @escaping (_ id: String, _ newValue: Bool) -> Void = { _, _ in }
     ) {
         self.reminder = reminder
         self.onQuickEdit = onQuickEdit
         self.onOpenDetail = onOpenDetail
         self.isNewDraft = isNewDraft
         self.onAbandonDraft = onAbandonDraft
+        self.onToggleComplete = onToggleComplete
         _title = State(initialValue: reminder.title)
-        _desc  = State(initialValue: reminder.description ?? "")
+        _desc = State(initialValue: reminder.description ?? "")
+        _isCompleted = State(initialValue: reminder.isCompleted)
     }
 
     var body: some View {
         HStack(spacing: 12) {
-
+            Button {
+                isCompleted.toggle()
+                onToggleComplete(reminder.id, isCompleted)
+            } label: {
+                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 20))
+                    .foregroundColor(isCompleted ? .green : .gray)
+            }
+            
             VStack(alignment: .leading, spacing: 4) {
                     TextField("Title", text: $title)
                         .font(.system(size: 17))
-                        .foregroundColor(.neutral1)
+                        .foregroundColor(isCompleted ? .neutral2 : .neutral1)
+                        .opacity(isCompleted ? 0.5 : 1)
                         .focused($focused, equals: .title)
                         .submitLabel(.done)
                         .onSubmit { commitSave() }
@@ -71,6 +85,7 @@ struct ReminderRowView: View {
                 TextField("Description (≤ 150)", text: $desc)
                     .font(.system(size: 15))
                     .foregroundStyle(.neutral2)
+                    .opacity(isCompleted ? 0.5 : 1)
                     .lineLimit(1)
                     .focused($focused, equals: .desc)
                     .submitLabel(.done)

@@ -17,6 +17,7 @@ struct Reminder: Identifiable, Equatable {
     var updatedAt: Date
     var tagId: String
     var photoPaths: [String]
+    var isCompleted: Bool 
 }
 
 extension Reminder {
