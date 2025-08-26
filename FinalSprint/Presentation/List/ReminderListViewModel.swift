@@ -75,6 +75,32 @@ final class ReminderListViewModel: ObservableObject {
         r.updatedAt = Date()
         try? repo.update(r)
     }
+    
+    func createDraft() -> String {
+        let id = UUID().uuidString
+        let now = Date()
+        // chọn tag mặc định
+        let defaultTagId = repo.allTags().first?.id ?? ""
+
+        let r = Reminder(
+            id: id,
+            title: "",                     // trống -> Row sẽ focus để người dùng nhập
+            description: nil,
+            dueDate: Date().dayOnly,       // mặc định hôm nay
+            dueTimeMinutes: nil,           // chưa chọn giờ
+            createdAt: now,
+            updatedAt: now,
+            tagId: defaultTagId,
+            photoPaths: []
+        )
+        try? repo.create(r)
+        return id
+    }
+
+    func deleteDraft(id: String) {
+        try? repo.delete(id: id)
+    }
+
 }
 
 

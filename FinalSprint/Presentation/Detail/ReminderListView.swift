@@ -15,6 +15,8 @@ struct ReminderListView: View {
     @StateObject private var vm: ReminderListViewModel
     @State private var showingEditor = false
     @State private var editingId: EditingReminder? = nil
+    @State private var justCreatedId: String? = nil
+    private struct SheetItem: Identifiable { let id: String }
 
     init(repo: ReminderRepository) {
         _vm = StateObject(wrappedValue: ReminderListViewModel(repo: repo))
@@ -23,45 +25,7 @@ struct ReminderListView: View {
     var body: some View {
         NavigationStack {
             List {
-                if vm.today.isEmpty && vm.upcoming.isEmpty {
-                    VStack(alignment: .center) {
-                        Spacer()
-                        HStack {
-                            Spacer()
-                            Text("Chưa có lời nhắc nào được thêm")
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                        }
-                        Spacer()
-                    }
-                    .listRowBackground(Color.clear)
-                } else {
-                    if !vm.today.isEmpty {
-                        Section("Today") {
-                            ForEach(vm.today) { r in
-                                ReminderRowView(
-                                    reminder: r,
-                                    onQuickEdit: { id, t, d in vm.quickUpdate(id: id, title: t, desc: d) },
-                                    onOpenDetail: { r in editingId = EditingReminder(id: r.id) }
-                                )
-                            }
-                            .onDelete { vm.delete(at: $0, isToday: true) }
-                        }
-                    }
-
-                    if !vm.upcoming.isEmpty{
-                        Section("Upcoming") {
-                            ForEach(vm.upcoming) { r in
-                                ReminderRowView(
-                                    reminder: r,
-                                    onQuickEdit: { id, t, d in vm.quickUpdate(id: id, title: t, desc: d) },
-                                    onOpenDetail: { r in editingId = EditingReminder(id: r.id) }
-                                )
-                            }
-                            .onDelete { vm.delete(at: $0, isToday: false) }
-                        }
-                    }
-                }
+                content
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Reminders")
@@ -79,21 +43,87 @@ struct ReminderListView: View {
             }
             .overlay(alignment: .bottomLeading) {
                 Button {
-                    showingEditor = true
+                    // TẠO DRAFT VÀ FOCUS VÀO DÒNG MỚI
+                    let newId = vm.createDraft()
+                    justCreatedId = newId
                 } label: {
-                    Label("New Reminder", systemImage: "plus.circle.fill")
-                        .font(.system(size: 18, weight: .semibold))
+                    Label("New Reminder", systemImage: "plus")
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
+                        .background(.ultraThinMaterial, in: Capsule())
                 }
                 .padding()
             }
-            .sheet(isPresented: $showingEditor) {
-                ReminderEditorView(repo: DIContainer.shared.repo)
-            }
-            .sheet(item: $editingId) { item in
+            .sheet(item: Binding(
+                get: { editingId.map { SheetItem(id: $0.id) } },
+                set: { editingId = $0.map { EditingReminder(id: $0.id) } }
+            )) { item in
                 ReminderEditorView(repo: DIContainer.shared.repo, editingId: item.id)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if vm.today.isEmpty && vm.upcoming.isEmpty {
+            emptyState
+        } else {
+            if !vm.today.isEmpty {
+                todaySection
+            }
+            if !vm.upcoming.isEmpty {
+                upcomingSection
+            }
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(alignment: .center) {
+            Spacer()
+            HStack {
+                Spacer()
+                Text("Chưa có lời nhắc nào được thêm")
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            Spacer()
+        }
+        .listRowBackground(Color.clear)
+    }
+
+    private var todaySection: some View {
+        Section("Today") {
+            ForEach(vm.today) { r in
+                ReminderRowView(
+                    reminder: r,
+                    onQuickEdit: { id, t, d in vm.quickUpdate(id: id, title: t, desc: d) },
+                    onOpenDetail: { rem in editingId = EditingReminder(id: rem.id) },
+                    isNewDraft: justCreatedId == r.id,
+                    onAbandonDraft: { id in
+                        vm.deleteDraft(id: id)
+                        if justCreatedId == id { justCreatedId = nil }
+                    }
+                )
+            }
+            .onDelete { vm.delete(at: $0, isToday: true) }
+        }
+    }
+
+    private var upcomingSection: some View {
+        Section("Upcoming") {
+            ForEach(vm.upcoming) { r in
+                ReminderRowView(
+                    reminder: r,
+                    onQuickEdit: { id, t, d in vm.quickUpdate(id: id, title: t, desc: d) },
+                    onOpenDetail: { rem in editingId = EditingReminder(id: rem.id) },
+                    isNewDraft: justCreatedId == r.id,
+                    onAbandonDraft: { id in
+                        vm.deleteDraft(id: id)
+                        if justCreatedId == id { justCreatedId = nil }
+                    }
+                )
+            }
+            .onDelete { vm.delete(at: $0, isToday: false) }
         }
     }
 }
