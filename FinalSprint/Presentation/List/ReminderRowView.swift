@@ -13,7 +13,6 @@ struct ReminderRowView: View {
     let onQuickEdit: (_ id: String, _ newTitle: String, _ newDesc: String?) -> Void
     let onOpenDetail: (_ r: Reminder) -> Void
 
-    // NEW:
     let isNewDraft: Bool
     let onAbandonDraft: (_ id: String) -> Void
     let onToggleComplete: (_ id: String, _ newValue: Bool) -> Void
@@ -25,7 +24,6 @@ struct ReminderRowView: View {
     @State private var saveTask: Task<Void, Never>?
     private enum Field { case title, desc }
 
-    // Lấy tên tag display name dựa trên tagId
     private var tagDisplayName: String {
         guard
             let realm = try? RealmManager.makeRealm(),
@@ -75,7 +73,6 @@ struct ReminderRowView: View {
                         .submitLabel(.done)
                         .onSubmit { commitSave() }
                         .onChange(of: focused) { _, newFocus in
-                            // Nếu vừa mất focus khỏi Title, lại là draft + title trống => huỷ ngay
                             if (newFocus == nil), isNewDraft, title.trimmingCharacters(in: .whitespaces).isEmpty {
                                 onAbandonDraft(reminder.id)
                             }
@@ -104,13 +101,11 @@ struct ReminderRowView: View {
         }
         .contentShape(Rectangle())
         .onAppear {
-            // focus title nếu là draft vừa tạo
             if isNewDraft {
                 DispatchQueue.main.async { focused = .title }
             }
         }
         .onDisappear {
-            // nếu là draft và title rỗng → huỷ
             if isNewDraft && title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 onAbandonDraft(reminder.id)
             } else {
@@ -132,12 +127,9 @@ struct ReminderRowView: View {
         var newDesc = desc.trimmingCharacters(in: .whitespacesAndNewlines)
         if newDesc.isEmpty { newDesc = "" }
 
-        // Nếu là draft và title vẫn rỗng → chưa lưu (đợi user tiếp tục hoặc sẽ xoá khi thoát)
         if isNewDraft && newTitle.isEmpty { return }
 
-        // Validate inline
         guard !newTitle.isEmpty, newTitle.count <= 50, newDesc.count <= 150 else {
-            // rollback về giá trị đã lưu
             title = reminder.title
             desc  = reminder.description ?? ""
             return

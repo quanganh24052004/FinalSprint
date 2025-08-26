@@ -21,7 +21,6 @@ struct Reminder: Identifiable, Equatable {
 }
 
 extension Reminder {
-    /// Kết hợp dueDate + dueTimeMinutes → Date đầy đủ
     var effectiveDueDate: Date {
         let base = dueDate.dayOnly
         guard let mins = dueTimeMinutes else {

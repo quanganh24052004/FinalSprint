@@ -48,7 +48,7 @@ struct ReminderEditorView: View {
                     if let err = vm.dateError { Text(err).font(.footnote).foregroundStyle(.red) }
                 }
                 Section {
-                    Picker("Tag", selection: $vm.selectedTagId) {
+                    Picker(selection: $vm.selectedTagId) {
                         ForEach(vm.allTags) { t in
                             HStack {
                                 Circle()
@@ -58,12 +58,17 @@ struct ReminderEditorView: View {
                             }
                             .tag(t.id)
                         }
+                    } label: {
+                        HStack {
+                            Image("ic_Tag")
+                            Text("Tag")
+                        }
                     }
                 }
                 
                 Section {
                     PhotosPicker(selection: $vm.pickerItems, matching: .images, photoLibrary: .shared()) {
-                        Label("Thêm ảnh", systemImage: "photo.on.rectangle")
+                        Label("Thêm ảnh", systemImage: "photo.rectangle")
                     }
 
                     if !vm.photoPaths.isEmpty {

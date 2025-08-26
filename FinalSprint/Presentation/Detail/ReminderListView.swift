@@ -43,7 +43,6 @@ struct ReminderListView: View {
             }
             .overlay(alignment: .bottomLeading) {
                 Button {
-                    // TẠO DRAFT VÀ FOCUS VÀO DÒNG MỚI
                     let newId = vm.createDraft()
                     justCreatedId = newId
                 } label: {

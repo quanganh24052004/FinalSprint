@@ -17,7 +17,6 @@ enum BuiltInTag: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Màu chữ sẽ lấy từ Asset Catalog (ví dụ: TagCôngViệc, TagHọcTập...)
     var color: Color {
         Color(rawValue)
     }
@@ -36,7 +35,7 @@ enum TagColorKey {
         case "Học tập":   return "TagStudy"
         case "Thói quen": return "TagHabit"
         case "Sức khoẻ":  return "TagHealth"
-        default:          return "TagDefault" // tạo Color Set này (xám) làm fallback
+        default:          return "TagDefault"
         }
     }
 }

@@ -9,8 +9,6 @@ import Foundation
 import UserNotifications
 
 enum NotificationScheduler {
-    /// Lên lịch nhắc trước dueDate 1 giờ. Vì mình chỉ lưu "ngày",
-    /// mặc định coi dueDate nổ lúc 09:00, thì notification lúc 08:00.
     static func schedule1hBefore(reminderId: String, title: String, dueDateTime: Date) async {
         let center = UNUserNotificationCenter.current()
         let granted = try? await center.requestAuthorization(options: [.alert, .badge, .sound])

@@ -13,7 +13,7 @@ final class ReminderRealm: Object {
     @Persisted var title: String = ""
     @Persisted var descText: String?
     @Persisted var dueDate: Date = Date()
-    @Persisted var dueTimeMinutes: Int?    // <-- mới
+    @Persisted var dueTimeMinutes: Int?
     @Persisted var createdAt: Date = Date()
     @Persisted var updatedAt: Date = Date()
     @Persisted var tag: TagRealm?
@@ -21,7 +21,6 @@ final class ReminderRealm: Object {
     @Persisted var isCompleted: Bool = false
 }
 
-// Mapping
 private extension ReminderRealm {
     func toDomain() -> Reminder {
         Reminder(id: id,

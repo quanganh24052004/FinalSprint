@@ -64,7 +64,6 @@ final class ReminderDetailViewModel: ObservableObject {
             }
             .store(in: &bag)
 
-        // Load picked images → lưu local
         $pickerItems
             .dropFirst()
             .sink { items in
@@ -88,9 +87,8 @@ final class ReminderDetailViewModel: ObservableObject {
 
         descError = descriptionText.isEmpty ? nil : (descriptionText.count > 150 ? "Mô tả ≤ 150 ký tự" : nil)
 
-        // Ngày+giờ hiệu lực
         if !useDate {
-            dateError = nil // Không kiểm tra ngày nếu không dùng ngày
+            dateError = nil
         } else {
             let effDue: Date = {
                 if useTime {
@@ -120,7 +118,7 @@ final class ReminderDetailViewModel: ObservableObject {
             id: editingId ?? UUID().uuidString,
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             description: descriptionText.isEmpty ? nil : descriptionText,
-            dueDate: useDate ? dueDate.dayOnly : Date.distantFuture, // Nếu không dùng ngày thì lưu distantFuture
+            dueDate: useDate ? dueDate.dayOnly : Date.distantFuture,
             dueTimeMinutes: useTime && useDate ? mins : nil,
             createdAt: editingId == nil ? now : (repo.get(id: editingId!)?.createdAt ?? now),
             updatedAt: now,

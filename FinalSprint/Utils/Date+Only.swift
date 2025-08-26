@@ -8,7 +8,6 @@
 import Foundation
 
 extension Date {
-    /// Cắt về 00:00 của ngày hiện tại (theo Calendar.current)
     var dayOnly: Date {
         Calendar.current.startOfDay(for: self)
     }

@@ -8,7 +8,7 @@ import SwiftUI
 import RealmSwift
 
 struct TagChip: View {
-    let tag: String // tagId
+    let tag: String
 
     private var color: Color {
         guard
